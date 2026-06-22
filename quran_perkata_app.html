@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta charset="utf-8"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:var(--font-sans,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif);font-size:16px}
+:root{
+  --c-gold:#B8860B;--c-gold-light:#FFF8E1;--c-gold-border:#E8C84A;
+  --c-green:#0F6E56;--c-green-light:#E1F5EE;
+  --c-text:var(--color-text-primary,#1a1a1a);
+  --c-muted:var(--color-text-secondary,#666);
+  --c-bg:var(--color-background-primary,#fff);
+  --c-surface:var(--color-background-secondary,#f8f8f8);
+  --c-border:var(--color-border-tertiary,#e0e0e0);
+  --radius:12px;--radius-sm:8px;
+}
+
+/* ── Layout ── */
+.app{min-height:100dvh;padding:0 0 90px;max-width:480px;margin:0 auto}
+
+/* ── Header ── */
+.header{
+  padding:16px 16px 12px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--c-border);
+}
+.header-title{font-size:16px;font-weight:600;color:var(--c-text)}
+.header-sub{font-size:12px;color:var(--c-muted);margin-top:2px}
+.header-icon{
+  width:36px;height:36px;border-radius:50%;
+  background:var(--c-green-light);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--c-green);font-size:18px;flex-shrink:0;
+}
+
+/* ── Tabs ── */
+.tabs{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  border-bottom:1px solid var(--c-border);
+  background:var(--c-bg);
+  position:sticky;top:0;z-index:10;
+}
+.tab{
+  padding:12px 0;font-size:13px;font-weight:500;
+  color:var(--c-muted);cursor:pointer;text-align:center;
+  border-bottom:2px solid transparent;
+  transition:color .18s,border-color .18s;
+}
+.tab.active{color:var(--c-green);border-bottom-color:var(--c-green)}
+
+/* ── Content ── */
+.content{padding:14px 14px 0}
+
+/* ── Settings card ── */
+.settings-card{
+  background:var(--c-surface);
+  border:1px solid var(--c-border);
+  border-radius:var(--radius);
+  overflow:hidden;
+  margin-bottom:14px;
+}
+.settings-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:13px 14px;
+  border-bottom:1px solid var(--c-border);
+  gap:12px;
+}
+.settings-row:last-child{border-bottom:none}
+.settings-row label{font-size:14px;color:var(--c-text);flex-shrink:0}
+.settings-row select,
+.settings-row input[type=number]{
+  font-size:14px;padding:7px 10px;
+  border-radius:var(--radius-sm);
+  border:1px solid var(--c-border);
+  background:var(--c-bg);color:var(--c-text);
+  min-width:0;flex:1;max-width:180px;
+}
+.ayat-range{display:flex;gap:8px;align-items:center;flex:1;justify-content:flex-end}
+.ayat-range input{width:60px;text-align:center;flex:none}
+.ayat-sep{font-size:12px;color:var(--c-muted);white-space:nowrap}
+.toggle-group{display:flex;gap:4px}
+.tgl{
+  font-size:13px;padding:7px 14px;
+  border-radius:20px;border:1px solid var(--c-border);
+  cursor:pointer;color:var(--c-muted);background:var(--c-bg);
+  font-weight:500;transition:all .15s;
+}
+.tgl.on{background:var(--c-green);color:#fff;border-color:var(--c-green)}
+.apply-btn{
+  display:block;width:calc(100% - 28px);margin:0 14px 14px;
+  padding:13px;background:var(--c-green);color:#fff;
+  border:none;border-radius:var(--radius-sm);
+  font-size:15px;font-weight:600;cursor:pointer;
+  letter-spacing:.01em;
+}
+.apply-btn:active{opacity:.82;transform:scale(.98)}
+
+/* ── Surah header ── */
+.surah-header{
+  text-align:center;padding:20px 16px;
+  background:linear-gradient(145deg,#0F6E56,#1a9970);
+  border-radius:var(--radius);margin-bottom:14px;color:#fff;
+}
+.surah-name-ar{font-size:30px;font-family:'Amiri',serif;margin-bottom:6px;line-height:1.4}
+.surah-name-id{font-size:13px;opacity:.85;letter-spacing:.02em}
+.bismillah{
+  text-align:center;font-size:24px;font-family:'Amiri',serif;
+  color:var(--c-gold);padding:14px 0 10px;direction:rtl;line-height:1.7;
+}
+
+/* ── Per-ayat ── */
+.ayat-block{
+  margin-bottom:14px;
+  border:1px solid var(--c-border);
+  border-radius:var(--radius);overflow:hidden;
+  box-shadow:0 1px 3px rgba(0,0,0,.04);
+}
+.ayat-ar{
+  direction:rtl;text-align:right;
+  font: 0.875rem 'Inter', "Scheherazade New", 'Noto Sans Arabic', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;font-size:26px;line-height:2;
+  padding:16px 14px 12px;color:var(--c-text);background:var(--c-gold-light);
+}
+.ayat-num{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:30px;height:30px;border-radius:50%;
+  background:var(--c-gold);color:#fff;font-size:12px;
+  margin-right:8px;font-family:sans-serif;flex-shrink:0;
+}
+.ayat-tr{
+  padding:12px 14px;font-size:14px;
+  color:var(--c-muted);line-height:1.65;background:var(--c-bg);
+}
+
+/* ── Per-kata ── */
+.kata-ayat{margin-bottom:16px}
+.kata-ayat-num{
+  font-size:12px;color:var(--c-muted);
+  margin-bottom:10px;padding-bottom:8px;
+  border-bottom:1px solid var(--c-border);
+  font-weight:500;
+}
+.kata-grid{display:flex;flex-wrap:wrap;gap:8px;direction:rtl;justify-content:flex-end}
+.kata-item{
+  background:var(--c-surface);
+  border:1px solid var(--c-border);
+  border-radius:var(--radius-sm);
+  padding:10px 12px;text-align:center;
+  cursor:pointer;min-width:64px;
+  transition:background .12s,border-color .12s,transform .1s;
+}
+.kata-item:active{
+  background:var(--c-green-light);border-color:var(--c-green);
+  transform:scale(.95);
+}
+.kata-ar{font-family:'Amiri',serif;font-size:22px;color:var(--c-text);direction:rtl;line-height:1.5}
+.kata-tr{font-size:11px;color:var(--c-muted);margin-top:4px;direction:ltr;line-height:1.3}
+
+/* ── Flashcard ── */
+.fc-wrap{padding:4px 0}
+.fc-mode-row{display:flex;gap:6px;margin-bottom:12px}
+.fc-mode-btn{
+  flex:1;padding:10px 6px;font-size:13px;font-weight:500;
+  border:1px solid var(--c-border);border-radius:var(--radius-sm);
+  background:var(--c-bg);cursor:pointer;color:var(--c-muted);
+  transition:all .15s;
+}
+.fc-mode-btn.on{background:var(--c-green);color:#fff;border-color:var(--c-green)}
+.fc-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.fc-nav span{font-size:14px;color:var(--c-muted);font-weight:500}
+.fc-btn{
+  width:42px;height:42px;border-radius:50%;
+  border:1px solid var(--c-border);background:var(--c-surface);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  color:var(--c-text);font-size:18px;transition:background .12s;
+}
+.fc-btn:active{background:var(--c-green-light)}
+.fc-btn:disabled{opacity:.3;pointer-events:none}
+.flashcard{
+  background:var(--c-bg);border:1px solid var(--c-border);
+  border-radius:var(--radius);min-height:200px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:28px 20px;cursor:pointer;
+  box-shadow:0 2px 8px rgba(0,0,0,.06);
+  transition:transform .08s;user-select:none;
+}
+.flashcard:active{transform:scale(.98)}
+.fc-front,.fc-back{text-align:center;width:100%}
+.fc-ar{font-family:'Amiri',serif;font-size:42px;color:var(--c-text);direction:rtl;line-height:1.5}
+.fc-hint{font-size:12px;color:var(--c-muted);margin-top:14px;letter-spacing:.02em}
+.fc-tr-big{font-size:20px;font-weight:600;color:var(--c-green);margin-bottom:8px;line-height:1.4}
+.fc-ar-sm{font-family:'Amiri',serif;font-size:26px;color:var(--c-muted);direction:rtl}
+.fc-surah{font-size:12px;color:var(--c-muted);margin-top:10px}
+.swipe-hint{font-size:11px;color:var(--c-muted);text-align:center;margin-top:10px;opacity:.7}
+.fc-progress{display:flex;gap:4px;flex-wrap:wrap;margin-top:14px;justify-content:center}
+.fc-dot{width:8px;height:8px;border-radius:50%;border:1px solid var(--c-border);background:transparent}
+.fc-dot.done{background:var(--c-green);border-color:var(--c-green)}
+.fc-dot.cur{background:var(--c-gold);border-color:var(--c-gold)}
+.fc-actions{display:flex;gap:10px;margin-top:14px}
+.fc-actions button{
+  flex:1;padding:13px 8px;border-radius:var(--radius-sm);
+  font-size:14px;font-weight:500;cursor:pointer;
+  transition:opacity .15s;
+}
+.fc-actions button:active{opacity:.8}
+.fc-act-repeat{border:1px solid var(--c-border);background:var(--c-surface);color:var(--c-muted)}
+.fc-act-know{border:none;background:var(--c-green);color:#fff}
+
+/* ── Latihan result / progress ── */
+.lat-progress-bar{height:5px;background:var(--c-border);border-radius:3px;margin-bottom:14px;overflow:hidden}
+.lat-progress-fill{height:100%;background:var(--c-green);border-radius:3px;transition:width .3s}
+.lat-question-card{
+  background:var(--c-surface);border:1px solid var(--c-border);
+  border-radius:var(--radius);text-align:center;
+  padding:24px 16px;margin-bottom:14px;
+}
+.lat-choices{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.lat-choice-btn{
+  padding:14px 8px;
+  border:1px solid var(--c-border);border-radius:var(--radius-sm);
+  background:var(--c-bg);color:var(--c-text);
+  cursor:pointer;font-size:13px;min-height:60px;
+  line-height:1.4;transition:background .12s,border-color .12s;
+}
+.lat-choice-btn:active{background:var(--c-green-light)}
+
+.badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:10px;background:var(--c-green-light);color:var(--c-green);margin:2px}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+
+<h2 class="sr-only" style="position:absolute;left:-9999px">Aplikasi Al-Qur'an per kata — Surat 112, 113, 114</h2>
+<div class="app" id="app">
+  <div class="header">
+    <div>
+      <div class="header-title">Al-Qur'an Per Kata</div>
+      <div class="header-sub">Surat 112–114 · Baca &amp; Latihan</div>
+    </div>
+    <div class="header-icon">📖</div>
+  </div>
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('baca')">Baca</div>
+    <div class="tab" onclick="switchTab('latihan')">Latihan</div>
+    <div class="tab" onclick="switchTab('flashcard')">Flashcard</div>
+  </div>
+  <div class="content" id="content-baca">
+    <div id="baca-settings" class="settings-card">
+      <div class="settings-row">
+        <label>Surat</label>
+        <select id="sel-surah" onchange="updateAyatRange()">
+          <option value="112">112 - Al-Ikhlas</option>
+          <option value="113">113 - Al-Falaq</option>
+          <option value="114">114 - An-Nas</option>
+        </select>
+      </div>
+      <div class="settings-row">
+        <label>Ayat</label>
+        <div class="ayat-range">
+          <input type="number" id="ayat-from" value="1" min="1" max="4">
+          <span class="ayat-sep">s/d</span>
+          <input type="number" id="ayat-to" value="4" min="1" max="4">
+        </div>
+      </div>
+      <div class="settings-row">
+        <label>Tampilan</label>
+        <div class="toggle-group">
+          <div class="tgl on" id="tgl-ayat" onclick="setMode('ayat')">Per ayat</div>
+          <div class="tgl" id="tgl-kata" onclick="setMode('kata')">Per kata</div>
+        </div>
+      </div>
+      <div class="settings-row">
+        <label>Terjemahan</label>
+        <div class="toggle-group">
+          <div class="tgl on" id="tgl-tr-on" onclick="setTr(true)">Ya</div>
+          <div class="tgl" id="tgl-tr-off" onclick="setTr(false)">Tidak</div>
+        </div>
+      </div>
+      <button class="apply-btn" onclick="renderBaca()">Tampilkan</button>
+    </div>
+    <div id="baca-output"></div>
+  </div>
+  <div class="content" id="content-latihan" style="display:none">
+    <div class="settings-card">
+      <div class="settings-row">
+        <label>Surat</label>
+        <select id="lat-surah">
+          <option value="112">112 - Al-Ikhlas</option>
+          <option value="113">113 - Al-Falaq</option>
+          <option value="114">114 - An-Nas</option>
+        </select>
+      </div>
+      <div class="settings-row">
+        <label>Ayat</label>
+        <div class="ayat-range">
+          <input type="number" id="lat-from" value="1" min="1" max="4">
+          <span class="ayat-sep">s/d</span>
+          <input type="number" id="lat-to" value="4" min="1" max="4">
+        </div>
+      </div>
+      <div class="settings-row">
+        <label>Mode latihan</label>
+        <select id="lat-mode">
+          <option value="ar2tr">Arab → Terjemahan</option>
+          <option value="tr2ar">Terjemahan → Arab</option>
+          <option value="fill">Lengkapi ayat</option>
+        </select>
+      </div>
+      <button class="apply-btn" onclick="startLatihan()">Mulai Latihan</button>
+    </div>
+    <div id="latihan-output"></div>
+  </div>
+  <div class="content" id="content-flashcard" style="display:none">
+    <div class="settings-card">
+      <div class="settings-row">
+        <label>Surat</label>
+        <select id="fc-surah" onchange="fcUpdateRange()">
+          <option value="112">112 - Al-Ikhlas</option>
+          <option value="113">113 - Al-Falaq</option>
+          <option value="114">114 - An-Nas</option>
+          <option value="all">Semua surat</option>
+        </select>
+      </div>
+      <div class="settings-row">
+        <label>Level kartu</label>
+        <select id="fc-level">
+          <option value="kata">Per kata</option>
+          <option value="ayat">Per ayat</option>
+        </select>
+      </div>
+      <button class="apply-btn" onclick="startFlashcard()">Mulai Flashcard</button>
+    </div>
+    <div id="fc-output"></div>
+  </div>
+</div>
+
+<script>
+const DATA = {
+  112:{
+    name:'Al-Ikhlas', id:'Yang Ikhlas', jml:4,
+    hasBismillah:true,
+    ayat:[
+      {n:1, ar:'قُلْ هُوَ ٱللَّهُ أَحَدٌ', tr:'Katakanlah: Dialah Allah, Yang Maha Esa',
+       kata:[
+        {ar:'قُلْ',tr:'Katakanlah'},{ar:'هُوَ',tr:'Dia'},{ar:'ٱللَّهُ',tr:'Allah'},
+        {ar:'أَحَدٌ',tr:'Yang Maha Esa'}]},
+      {n:2, ar:'ٱللَّهُ ٱلصَّمَدُ', tr:'Allah adalah Tuhan tempat bergantung',
+       kata:[{ar:'ٱللَّهُ',tr:'Allah'},{ar:'ٱلصَّمَدُ',tr:'Yang Maha Dibutuhkan'}]},
+      {n:3, ar:'لَمْ يَلِدْ وَلَمْ يُولَدْ', tr:'Dia tidak beranak dan tidak pula diperanakkan',
+       kata:[{ar:'لَمْ',tr:'tidak'},{ar:'يَلِدْ',tr:'beranak'},{ar:'وَلَمْ',tr:'dan tidak'},{ar:'يُولَدْ',tr:'diperanakkan'}]},
+      {n:4, ar:'وَلَمْ يَكُن لَّهُۥ كُفُوًا أَحَدٌ', tr:'Dan tidak ada sesuatu yang setara dengan Dia',
+       kata:[{ar:'وَلَمْ',tr:'dan tidak'},{ar:'يَكُن',tr:'ada'},{ar:'لَّهُۥ',tr:'bagi-Nya'},{ar:'كُفُوًا',tr:'yang setara'},{ar:'أَحَدٌ',tr:'seorangpun'}]},
+    ]
+  },
+  113:{
+    name:'Al-Falaq', id:'Waktu Subuh', jml:5,
+    hasBismillah:true,
+    ayat:[
+      {n:1, ar:'قُلْ أَعُوذُ بِرَبِّ ٱلْفَلَقِ', tr:'Katakanlah: Aku berlindung kepada Tuhan yang menguasai subuh',
+       kata:[{ar:'قُلْ',tr:'Katakanlah'},{ar:'أَعُوذُ',tr:'aku berlindung'},{ar:'بِرَبِّ',tr:'kepada Tuhan'},{ar:'ٱلْفَلَقِ',tr:'fajar/subuh'}]},
+      {n:2, ar:'مِن شَرِّ مَا خَلَقَ', tr:'dari kejahatan (makhluk yang) Dia ciptakan',
+       kata:[{ar:'مِن',tr:'dari'},{ar:'شَرِّ',tr:'kejahatan'},{ar:'مَا',tr:'apa'},{ar:'خَلَقَ',tr:'Dia ciptakan'}]},
+      {n:3, ar:'وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ', tr:'dan dari kejahatan malam apabila telah gelap gulita',
+       kata:[{ar:'وَمِن',tr:'dan dari'},{ar:'شَرِّ',tr:'kejahatan'},{ar:'غَاسِقٍ',tr:'malam'},{ar:'إِذَا',tr:'apabila'},{ar:'وَقَبَ',tr:'gelap gulita'}]},
+      {n:4, ar:'وَمِن شَرِّ ٱلنَّفَّٰثَٰتِ فِى ٱلْعُقَدِ', tr:'dan dari kejahatan (perempuan-perempuan) penyihir yang meniup pada buhul-buhul (talinya)',
+       kata:[{ar:'وَمِن',tr:'dan dari'},{ar:'شَرِّ',tr:'kejahatan'},{ar:'ٱلنَّفَّٰثَٰتِ',tr:'penyihir'},{ar:'فِى',tr:'pada'},{ar:'ٱلْعُقَدِ',tr:'buhul-buhul'}]},
+      {n:5, ar:'وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ', tr:'dan dari kejahatan orang yang dengki apabila ia dengki',
+       kata:[{ar:'وَمِن',tr:'dan dari'},{ar:'شَرِّ',tr:'kejahatan'},{ar:'حَاسِدٍ',tr:'orang dengki'},{ar:'إِذَا',tr:'apabila'},{ar:'حَسَدَ',tr:'ia dengki'}]},
+    ]
+  },
+  114:{
+    name:'An-Nas', id:'Manusia', jml:6,
+    hasBismillah:true,
+    ayat:[
+      {n:1, ar:'قُلْ أَعُوذُ بِرَبِّ النَّاسِ', tr:'Katakanlah: Aku berlindung kepada Tuhan manusia',
+       kata:[{ar:'قُلْ',tr:'Katakanlah'},{ar:'أَعُوذُ',tr:'aku berlindung'},{ar:'بِرَبِّ',tr:'kepada Tuhan'},{ar:'ٱلنَّاسِ',tr:'manusia'}]},
+      {n:2, ar:'مَلِكِ ٱلنَّاسِ', tr:'Raja manusia',
+       kata:[{ar:'مَلِكِ',tr:'Raja'},{ar:'ٱلنَّاسِ',tr:'manusia'}]},
+      {n:3, ar:'إِلَٰهِ ٱلنَّاسِ', tr:'Sembahan manusia',
+       kata:[{ar:'إِلَٰهِ',tr:'Sembahan'},{ar:'ٱلنَّاسِ',tr:'manusia'}]},
+      {n:4, ar:'مِن شَرِّ ٱلْوَسْوَاسِ ٱلْخَنَّاسِ', tr:'dari kejahatan (bisikan) setan yang bersembunyi',
+       kata:[{ar:'مِن',tr:'dari'},{ar:'شَرِّ',tr:'kejahatan'},{ar:'ٱلْوَسْوَاسِ',tr:'bisikan'},{ar:'ٱلْخَنَّاسِ',tr:'yang bersembunyi'}]},
+      {n:5, ar:'ٱلَّذِى يُوَسْوِسُ فِى صُدُورِ ٱلنَّاسِ', tr:'yang membisikkan (kejahatan) ke dalam dada manusia',
+       kata:[{ar:'ٱلَّذِى',tr:'yang'},{ar:'يُوَسْوِسُ',tr:'membisikkan'},{ar:'فِى',tr:'ke dalam'},{ar:'صُدُورِ',tr:'dada'},{ar:'ٱلنَّاسِ',tr:'manusia'}]},
+      {n:6, ar:'مِنَ ٱلْجِنَّةِ وَٱلنَّاسِ', tr:'dari (golongan) jin dan manusia',
+       kata:[{ar:'مِنَ',tr:'dari'},{ar:'ٱلْجِنَّةِ',tr:'jin'},{ar:'وَٱلنَّاسِ',tr:'dan manusia'}]},
+    ]
+  }
+};
+
+let readMode='ayat', showTr=true;
+function setMode(m){readMode=m;document.getElementById('tgl-ayat').className='tgl'+(m==='ayat'?' on':'');document.getElementById('tgl-kata').className='tgl'+(m==='kata'?' on':'')}
+function setTr(v){showTr=v;document.getElementById('tgl-tr-on').className='tgl'+(v?' on':'');document.getElementById('tgl-tr-off').className='tgl'+(!v?' on':'')}
+
+function updateAyatRange(){
+  const s=DATA[document.getElementById('sel-surah').value];
+  document.getElementById('ayat-from').max=s.jml;
+  document.getElementById('ayat-to').max=s.jml;
+  document.getElementById('ayat-to').value=s.jml;
+}
+
+function renderBaca(){
+  const sId=+document.getElementById('sel-surah').value;
+  const s=DATA[sId];
+  const fr=+document.getElementById('ayat-from').value;
+  const to=+document.getElementById('ayat-to').value;
+  const ayats=s.ayat.filter(a=>a.n>=fr&&a.n<=to);
+  let html=`<div class="surah-header">
+    <div class="surah-name-ar" style="font-family:'Amiri',serif">${s.name}</div>
+    <div class="surah-name-id">${sId}. ${s.name} — ${s.id} · ${s.jml} Ayat</div>
+  </div>`;
+  if(fr===1&&sId!==9) html+=`<div class="bismillah">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>`;
+  if(readMode==='ayat'){
+    ayats.forEach(a=>{
+      html+=`<div class="ayat-block">
+        <div class="ayat-ar"><span class="ayat-num">${a.n}</span>${a.ar}</div>
+        ${showTr?`<div class="ayat-tr">${a.tr}</div>`:''}
+      </div>`;
+    });
+  } else {
+    ayats.forEach(a=>{
+      html+=`<div class="kata-ayat">
+        <div class="kata-ayat-num">Ayat ${a.n}${showTr?` — ${a.tr}`:''}</div>
+        <div class="kata-grid">`;
+      a.kata.forEach(k=>{
+        html+=`<div class="kata-item"><div class="kata-ar">${k.ar}</div>${showTr?`<div class="kata-tr">${k.tr}</div>`:''}</div>`;
+      });
+      html+=`</div></div>`;
+    });
+  }
+  document.getElementById('baca-output').innerHTML=html;
+}
+
+// LATIHAN
+let latState={};
+function startLatihan(){
+  const sId=+document.getElementById('lat-surah').value;
+  const s=DATA[sId];
+  const fr=+document.getElementById('lat-from').value;
+  const to=+document.getElementById('lat-to').value;
+  const mode=document.getElementById('lat-mode').value;
+  const ayats=s.ayat.filter(a=>a.n>=fr&&a.n<=to);
+  const kata=[];
+  ayats.forEach(a=>a.kata.forEach(k=>kata.push({...k,ayat:a.n,surah:s.name})));
+  latState={kata,mode,idx:0,score:0,total:kata.length,answered:false};
+  renderLatihan();
+}
+
+function renderLatihan(){
+  const {kata,mode,idx,score,total}=latState;
+  if(idx>=total){
+    document.getElementById('latihan-output').innerHTML=`
+      <div class="settings-card" style="text-align:center;padding:24px">
+        <div style="font-size:32px;margin-bottom:8px">🎉</div>
+        <div style="font-size:18px;font-weight:500;color:var(--c-green);margin-bottom:4px">${score} / ${total}</div>
+        <div style="font-size:13px;color:var(--c-muted)">Latihan selesai!</div>
+        <button class="apply-btn" onclick="startLatihan()" style="margin-top:16px">Ulangi</button>
+      </div>`;
+    return;
+  }
+  const k=kata[idx];
+  const progress=Math.round((idx/total)*100);
+  let Q,A;
+  if(mode==='ar2tr'){Q=k.ar;A=k.tr;}
+  else if(mode==='tr2ar'){Q=k.tr;A=k.ar;}
+  else{Q=k.ar;A=k.tr;}
+
+  // generate choices
+  const pool=latState.kata.filter((_,i)=>i!==idx);
+  const shuffled=[...pool].sort(()=>Math.random()-.5).slice(0,3);
+  const choices=shuffled.map(c=>mode==='ar2tr'?c.tr:c.ar);
+  choices.push(A);
+  choices.sort(()=>Math.random()-.5);
+
+  let html=`
+    <div style="margin-bottom:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <span style="font-size:13px;color:var(--c-muted);font-weight:500">${idx+1} / ${total}</span>
+        <span style="font-size:13px;color:var(--c-green);font-weight:600">Skor: ${score}</span>
+      </div>
+      <div class="lat-progress-bar">
+        <div class="lat-progress-fill" style="width:${progress}%"></div>
+      </div>
+    </div>
+    <div class="lat-question-card">
+      <div style="font-size:12px;color:var(--c-muted);margin-bottom:12px">Ayat ${k.ayat} · ${k.surah}</div>
+      <div style="${mode==='ar2tr'?'font-family:Amiri,serif;font-size:34px;direction:rtl':'font-size:18px;font-weight:500'};color:var(--c-text);line-height:1.6">${Q}</div>
+    </div>
+    <div class="lat-choices" id="choices">`;
+  choices.forEach((c,i)=>{
+    const isAr=mode==='tr2ar';
+    html+=`<button onclick="checkAnswer(${i},'${encodeURIComponent(c)}','${encodeURIComponent(A)}')" 
+      class="lat-choice-btn" style="${isAr?'font-family:Amiri,serif;font-size:20px;direction:rtl':'font-size:13px'}" id="choice-${i}">
+      ${c}</button>`;
+  });
+  html+=`</div>`;
+  document.getElementById('latihan-output').innerHTML=html;
+}
+
+function checkAnswer(i,chosen,correct){
+  const c=decodeURIComponent(chosen),r=decodeURIComponent(correct);
+  const btns=document.querySelectorAll('[id^=choice-]');
+  btns.forEach((b,j)=>{
+    if(b.textContent.trim()===r) b.style.background='var(--c-background-success,#E1F5EE)',b.style.borderColor='var(--c-green)';
+  });
+  if(c===r){
+    latState.score++;
+    btns[i].style.background='var(--c-green)';
+    btns[i].style.color='#fff';
+  } else {
+    btns[i].style.background='var(--color-background-danger,#FCEBEB)';
+    btns[i].style.borderColor='red';
+  }
+  btns.forEach(b=>b.disabled=true);
+  setTimeout(()=>{latState.idx++;renderLatihan();},900);
+}
+
+// FLASHCARD
+let fc={cards:[],idx:0,flipped:false,done:[]};
+let touchStartX=0,touchStartY=0;
+
+function fcUpdateRange(){
+  const v=document.getElementById('fc-surah').value;
+}
+
+function startFlashcard(){
+  const sId=document.getElementById('fc-surah').value;
+  const level=document.getElementById('fc-level').value;
+  let cards=[];
+  const srcs=sId==='all'?[112,113,114]:[+sId];
+  srcs.forEach(id=>{
+    const s=DATA[id];
+    if(level==='kata'){
+      s.ayat.forEach(a=>a.kata.forEach(k=>cards.push({ar:k.ar,tr:k.tr,ref:`Q.S ${s.name} : ${a.n}`,surah:s.name})));
+    } else {
+      s.ayat.forEach(a=>cards.push({ar:a.ar,tr:a.tr,ref:`Q.S ${s.name} : ${a.n}`,surah:s.name}));
+    }
+  });
+  cards.sort(()=>Math.random()-.5);
+  fc={cards,idx:0,flipped:false,done:[]};
+  renderFC();
+}
+
+function renderFC(){
+  const {cards,idx,flipped,done}=fc;
+  if(cards.length===0){document.getElementById('fc-output').innerHTML='<p style="color:var(--c-muted);font-size:13px;text-align:center">Mulai flashcard dari pengaturan di atas.</p>';return;}
+  const c=cards[idx];
+  const dots=cards.map((_,i)=>`<div class="fc-dot ${done.includes(i)?'done':i===idx?'cur':''}"></div>`).join('');
+  let html=`<div class="fc-wrap">
+    <div class="fc-mode-row">
+      <button class="fc-mode-btn ${!fc.showTr?'on':''}" onclick="setFCMode(false)">Arab → Arti</button>
+      <button class="fc-mode-btn ${fc.showTr?'on':''}" onclick="setFCMode(true)">Arti → Arab</button>
+    </div>
+    <div class="fc-nav">
+      <button class="fc-btn" onclick="fcPrev()" ${idx===0?'disabled':''} aria-label="Sebelumnya">‹</button>
+      <span>${idx+1} / ${cards.length}</span>
+      <button class="fc-btn" onclick="fcNext()" ${idx===cards.length-1?'disabled':''} aria-label="Berikutnya">›</button>
+    </div>
+    <div class="flashcard" id="fc-card" onclick="flipFC()" ontouchstart="fcTouchStart(event)" ontouchend="fcTouchEnd(event)">`;
+
+  if(!flipped){
+    const main=fc.showTr?c.tr:c.ar;
+    const isAr=!fc.showTr;
+    html+=`<div class="fc-front">
+      <div class="${isAr?'fc-ar':'fc-tr-big'}" style="${isAr?'':'font-size:20px;color:var(--c-text)'}">${main}</div>
+      <div class="fc-hint">Ketuk untuk lihat jawaban</div>
+    </div>`;
+  } else {
+    html+=`<div class="fc-back">
+      <div class="fc-tr-big" style="${fc.showTr?'font-family:Amiri,serif;font-size:28px;direction:rtl':''}">
+        ${fc.showTr?c.ar:c.tr}</div>
+      <div class="fc-ar-sm" style="${fc.showTr?'font-size:14px;direction:ltr;font-family:var(--font-sans)':''}">
+        ${fc.showTr?c.tr:c.ar}</div>
+      <div class="fc-surah">${c.ref}</div>
+    </div>`;
+  }
+  html+=`</div>
+    <div class="swipe-hint">← Geser atau ketuk untuk navigasi →</div>
+    <div class="fc-progress">${dots}</div>
+    <div class="fc-actions">
+      <button class="fc-act-repeat" onclick="fcMark(false)">↺ Ulangi</button>
+      <button class="fc-act-know" onclick="fcMark(true)">✓ Hafal</button>
+    </div>
+  </div>`;
+  document.getElementById('fc-output').innerHTML=html;
+}
+
+function setFCMode(v){fc.showTr=v;fc.flipped=false;renderFC();}
+function flipFC(){fc.flipped=!fc.flipped;renderFC();}
+function fcNext(){if(fc.idx<fc.cards.length-1){fc.idx++;fc.flipped=false;renderFC();}}
+function fcPrev(){if(fc.idx>0){fc.idx--;fc.flipped=false;renderFC();}}
+function fcMark(know){
+  if(know&&!fc.done.includes(fc.idx)) fc.done.push(fc.idx);
+  else fc.done=fc.done.filter(d=>d!==fc.idx);
+  if(fc.idx<fc.cards.length-1){fc.idx++;fc.flipped=false;}
+  renderFC();
+}
+function fcTouchStart(e){touchStartX=e.touches[0].clientX;touchStartY=e.touches[0].clientY;}
+function fcTouchEnd(e){
+  const dx=e.changedTouches[0].clientX-touchStartX;
+  const dy=e.changedTouches[0].clientY-touchStartY;
+  if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>40){
+    if(dx<0)fcNext();else fcPrev();
+  } else if(Math.abs(dy)<20&&Math.abs(dx)<20){flipFC();}
+}
+
+function switchTab(t){
+  ['baca','latihan','flashcard'].forEach(x=>{
+    document.getElementById('content-'+x).style.display=x===t?'block':'none';
+    document.querySelectorAll('.tab')[['baca','latihan','flashcard'].indexOf(x)].className='tab'+(x===t?' active':'');
+  });
+}
+
+// init
+renderBaca();
+</script>
+</html>
